@@ -94,7 +94,7 @@ Make sure React Developer Tools is installed and enabled.`);
 });
 
 const handleInspectElement = (e: KeyboardEvent) => {
-  if (e.key.toLowerCase() === "escape") {
+  if (e.key?.toLowerCase() === "escape") {
     e.preventDefault();
     exitInspectorMode();
   }
