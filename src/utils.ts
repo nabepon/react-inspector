@@ -27,6 +27,12 @@ export const getDevtoolsGlobalHookRenderer = () => {
 export const getVsCodeLink = (sourceCode: DebugSource) =>
   `vscode://file${sourceCode.fileName}:${sourceCode.lineNumber}:${sourceCode.columnNumber}`;
 
+export const getCodePath = (sourceCode: DebugSource) =>
+  `${sourceCode.fileName}:${sourceCode.lineNumber}:${sourceCode.columnNumber}`;
+
+export const getIntellijCodeLink = (sourceCode: DebugSource) =>
+  `idea://open?file=${sourceCode.fileName}&line=${sourceCode.lineNumber}&column=${sourceCode.columnNumber}`;
+
 export const findFiberByHostInstance = (
   target: HTMLElement
 ): { _debugSource: DebugSource } | null => {
@@ -35,9 +41,19 @@ export const findFiberByHostInstance = (
   const renderer = getDevtoolsGlobalHookRenderer();
   if (!renderer) return null;
 
-  const fiber = renderer.findFiberByHostInstance(target) || null;
+  const fiber = findFiber(renderer.findFiberByHostInstance(target)) || null;
 
   return fiber && fiber._debugSource ? fiber : null;
 };
 
 export {};
+
+const findFiber = (fiber?: any): any => {
+  if (fiber?._debugSource === null) {
+    return findFiber(fiber._debugOwner);
+  }
+  if (fiber?._debugSource) {
+    return fiber;
+  }
+  return null;
+}

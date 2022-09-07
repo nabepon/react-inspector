@@ -1,7 +1,8 @@
 import {
   checkDevtoolsGlobalHook,
-  getVsCodeLink,
+  getIntellijCodeLink,
   findFiberByHostInstance,
+  getCodePath,
 } from "./utils";
 import Overlay from "./Overlay";
 
@@ -55,7 +56,7 @@ const handleElementPointerOver = (e: PointerEvent) => {
   overlay.inspect([target], getInspectName(target));
 };
 
-const handleInspectorClick = (e: MouseEvent) => {
+const handleInspectorClick = async (e: MouseEvent) => {
   e.preventDefault();
   exitInspectorMode();
   const target = e.target as HTMLElement | null;
@@ -63,7 +64,7 @@ const handleInspectorClick = (e: MouseEvent) => {
 
   const fiber = findFiberByHostInstance(target);
   if (!fiber) {
-    alert("This element cannot be opened in VSCode.");
+    alert("This element cannot be opened in App.");
     return;
   }
 
@@ -71,7 +72,9 @@ const handleInspectorClick = (e: MouseEvent) => {
   document.getElementById(tmpId)?.removeAttribute("id");
   target.id = tmpId;
   window.postMessage("inspected", "*");
-  window.open(getVsCodeLink(fiber._debugSource));
+  const filePath = getCodePath(fiber._debugSource);
+  await navigator.clipboard.writeText(filePath).then(() => console.log(`copied: ${filePath}`))
+  window.open(getIntellijCodeLink(fiber._debugSource));
 };
 
 window.addEventListener("message", ({ data }: { data: string }) => {
